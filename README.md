@@ -6,3 +6,7 @@ npm install
 ```
 
 Populate config.json
+
+```
+node index.js
+```
