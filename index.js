@@ -1,6 +1,5 @@
 const axios = require("axios")
 const config = require("./config.json")
-const fs = require("fs")
 const icsParse = require("node-ical")
 
 const trelloFetch = async (route, method="GET", data={}) => {
@@ -42,6 +41,15 @@ const trelloFetch = async (route, method="GET", data={}) => {
             const splitIdx = summary.indexOf("[")
             const name = summary.substring(0, splitIdx)
             const course = summary.substring(splitIdx + 1, splitIdx + 9)
+
+            if (!course in labelMap) {
+                const resp = await trelloFetch("/labels", "POST", {
+                    name: course,
+                    color: "yellow",
+                    idBoard: board.id
+                }) 
+                labelMap[course] = resp.id
+            }
 
             await trelloFetch("/cards", "POST", {
                 idList: list.id,
