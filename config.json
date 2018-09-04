@@ -1,0 +1,11 @@
+{
+    "trello": {
+        "api": {
+            "key": "9bb4f26d2780fd6230c15fc87703a3f9",
+            "token": "**your token here**"
+        },
+        "boardName": "Tasks",
+        "listName": "Ice Box"
+    },
+    "canvasIcsUrl": "https://canvas.rice.edu/feeds/calendars/user_TjHkLwetdu59qJHR6H3ZIBPEIlQLqvZx8ZFPRDcq.ics"
+}
