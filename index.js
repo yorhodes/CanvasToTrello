@@ -19,7 +19,9 @@ const trelloFetch = async (route, method="GET", data={}) => {
         response = await axios.request(request)
         return response.data
     } catch(err) {
-        console.log(err)
+        console.log("Error Encountered:")
+        console.log("Request: \n" + JSON.stringify(request, null, 2))
+        console.log("Error: \n" + JSON.stringify(err, null, 2))
         return
     }
 }
