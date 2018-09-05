@@ -29,9 +29,20 @@ const trelloFetch = async (route, method="GET", data={}) => {
     const boards = await trelloFetch("/member/me/boards")
     const board = boards.find(board => (board.name == config.trello.boardName))
 
+    if (typeof board === "undefined") {
+        console.log("Target board: " + config.trello.boardName + " was not found")
+        return
+    }
+
+
     // fetch target list from board
     const lists = await trelloFetch("/boards/" + board.id + "/lists")
     const list = lists.find(list => (list.name == config.trello.listName))
+
+    if (typeof list === "undefined") {
+        console.log("Target list: " + config.trello.listName + " was not found")
+        return
+    }
 
     // fetch labels form board
     const labels = await trelloFetch("/boards/" + board.id + "/labels")
@@ -61,6 +72,11 @@ const trelloFetch = async (route, method="GET", data={}) => {
             const splitIdx = summary.indexOf("[")
             const name = summary.substring(0, splitIdx)
             const course = summary.substring(splitIdx + 1, splitIdx + 9)
+
+            if (!course in labelMap) {
+                console.log("No label exists called: " + course)
+                return
+            }
 
             // create card
             await trelloFetch("/cards", "POST", {
