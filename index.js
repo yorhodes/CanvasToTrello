@@ -1,6 +1,8 @@
 const axios = require("axios")
 const config = require("./config.json")
+const diff = require("./assignmentDiff.json")
 const icsParse = require("node-ical")
+const fs = require("fs")
 
 const trelloFetch = async (route, method="GET", data={}) => {
     const request = {
@@ -17,7 +19,7 @@ const trelloFetch = async (route, method="GET", data={}) => {
         response = await axios.request(request)
         return response.data
     } catch(err) {
-        console.err(err)
+        console.log(err)
         return
     }
 }
@@ -41,9 +43,17 @@ const trelloFetch = async (route, method="GET", data={}) => {
     // parse canvas calendar
     icsParse.fromURL(config.canvasIcsUrl, {}, (err, events) => {
         if (err) console.log(err)
-        const assignmentKeys = Object.keys(events).filter(
-            key => key.startsWith("event-assignment")
+
+        // filter events on assignment type and unparsed
+        const assignmentKeys = Object.keys(events).filter(key => 
+            key.startsWith("event-assignment") &&
+            !diff.keys.includes(key)
         )
+
+        // update parsed
+        diff.keys = diff.keys.concat(assignmentKeys)
+        fs.writeFile("assignmentDiff.json", JSON.stringify(diff, null, 2))
+
         // iterate over assignments from calendar
         assignmentKeys.forEach(async (key) => {
             const event = events[key]
@@ -52,22 +62,12 @@ const trelloFetch = async (route, method="GET", data={}) => {
             const name = summary.substring(0, splitIdx)
             const course = summary.substring(splitIdx + 1, splitIdx + 9)
 
-            if (!course in labelMap) {
-                // create label for course
-                const resp = await trelloFetch("/labels", "POST", {
-                    name: course,
-                    color: "yellow",
-                    idBoard: board.id
-                }) 
-                labelMap[course] = resp.id
-            }
-
             // create card
             await trelloFetch("/cards", "POST", {
                 idList: list.id,
                 name: name,
                 idLabels: labelMap[course],
-                desc: event.description + "\n\n" + event.url,
+                desc: event.desc,
                 due: event.end
             })
         })
